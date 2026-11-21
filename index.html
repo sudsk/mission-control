@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FamilyCharts | Home Behaviour & Homework Tracker</title>
+    <title>Mission Control</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js for ClassCharts-style Donut Charts -->
@@ -61,7 +61,12 @@
                         <i class="fa-solid fa-chart-pie text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">Family<span class="text-indigo-600">Charts</span></h1>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">Mission<span class="text-indigo-600">Control</span></h1>
+                            <span id="github-sync-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <i class="fa-brands fa-github mr-1"></i>Auto-Sync On
+                            </span>
+                        </div>
                         <p class="text-xs text-slate-500 font-medium mt-0.5">Behaviour & Homework Progress Hub</p>
                     </div>
                 </div>
@@ -92,19 +97,15 @@
 
         <!-- Child Switcher & Quick Filter Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-            <!-- Child Tabs -->
+            <!-- Child Tabs (MK & NK only) -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" role="tablist">
-                <button id="tab-all" onclick="switchChild('all')" class="tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Family Overview</span>
-                </button>
-                <button id="tab-11y" onclick="switchChild('11y')" class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap border border-slate-200">
-                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    <span id="label-11y">Son (11y)</span>
+                <button id="tab-11y" onclick="switchChild('11y')" class="tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-white/90"></span>
+                    <span id="label-11y">MK</span>
                 </button>
                 <button id="tab-6y" onclick="switchChild('6y')" class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap border border-slate-200">
                     <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                    <span id="label-6y">Son (6y)</span>
+                    <span id="label-6y">NK</span>
                 </button>
             </div>
 
@@ -127,8 +128,8 @@
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Net Behaviour Score</p>
-                    <p id="kpi-net-score" class="text-3xl font-extrabold text-slate-900 mt-1">+0</p>
-                    <p id="kpi-ratio-text" class="text-xs font-semibold text-emerald-600 mt-1">100% Positive Ratio</p>
+                    <p id="kpi-net-score" class="text-3xl font-extrabold text-slate-900 mt-1">0</p>
+                    <p id="kpi-ratio-text" class="text-xs font-semibold text-slate-500 mt-1">0% Positive Ratio</p>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
                     <i class="fa-solid fa-star"></i>
@@ -139,7 +140,7 @@
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Positive Points</p>
-                    <p id="kpi-pos-points" class="text-3xl font-extrabold text-emerald-600 mt-1">+0</p>
+                    <p id="kpi-pos-points" class="text-3xl font-extrabold text-emerald-600 mt-1">0</p>
                     <p id="kpi-pos-count" class="text-xs text-slate-500 mt-1">0 awards logged</p>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
@@ -172,65 +173,6 @@
             </div>
         </section>
 
-        <!-- Side-by-Side Comparison Banner (Only visible in 'Family Overview' mode) -->
-        <section id="family-comparison-section" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 11y Summary Card -->
-            <div class="bg-gradient-to-br from-white to-blue-50/40 p-5 rounded-2xl border border-blue-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">11y</span>
-                        <div>
-                            <h3 id="comp-name-11y" class="font-bold text-slate-900 text-base">Son (11 Years)</h3>
-                            <p class="text-xs text-slate-500">JMC • Python • Big Bang Prep</p>
-                        </div>
-                    </div>
-                    <button onclick="switchChild('11y')" class="text-xs font-bold text-blue-600 hover:underline">View Details &rarr;</button>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-center bg-white/80 p-3 rounded-xl border border-slate-100">
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">POSITIVE</span>
-                        <span id="comp-11y-pos" class="text-lg font-extrabold text-emerald-600">+0</span>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">NEGATIVE</span>
-                        <span id="comp-11y-neg" class="text-lg font-extrabold text-rose-600">0</span>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">HOMEWORK</span>
-                        <span id="comp-11y-hw" class="text-lg font-extrabold text-blue-600">0 tasks</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6y Summary Card -->
-            <div class="bg-gradient-to-br from-white to-amber-50/40 p-5 rounded-2xl border border-amber-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-9 h-9 rounded-xl bg-amber-500 text-white font-bold flex items-center justify-center text-sm shadow-sm">6y</span>
-                        <div>
-                            <h3 id="comp-name-6y" class="font-bold text-slate-900 text-base">Son (6 Years)</h3>
-                            <p class="text-xs text-slate-500">Doodle English • Maths • Spelling • Tables</p>
-                        </div>
-                    </div>
-                    <button onclick="switchChild('6y')" class="text-xs font-bold text-amber-600 hover:underline">View Details &rarr;</button>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-center bg-white/80 p-3 rounded-xl border border-slate-100">
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">POSITIVE</span>
-                        <span id="comp-6y-pos" class="text-lg font-extrabold text-emerald-600">+0</span>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">NEGATIVE</span>
-                        <span id="comp-6y-neg" class="text-lg font-extrabold text-rose-600">0</span>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-semibold text-slate-400 block">HOMEWORK</span>
-                        <span id="comp-6y-hw" class="text-lg font-extrabold text-amber-600">0 tasks</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Main Content Grid: Behaviour Wheel + Homework Trackers -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
@@ -240,7 +182,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h2 class="text-lg font-bold text-slate-900">Behaviour Breakdown</h2>
-                            <p class="text-xs text-slate-500">ClassCharts Positive vs. Negative Wheel</p>
+                            <p class="text-xs text-slate-500">Positive vs. Negative Wheel</p>
                         </div>
                         <button onclick="openEntryModal('behaviour')" class="text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition">
                             + Award / Deduct
@@ -251,7 +193,7 @@
                     <div class="relative w-56 h-56 mx-auto my-4">
                         <canvas id="behaviourChart"></canvas>
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span id="wheel-percentage" class="text-3xl font-extrabold text-slate-800">100%</span>
+                            <span id="wheel-percentage" class="text-3xl font-extrabold text-slate-800">0%</span>
                             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Positive</span>
                         </div>
                     </div>
@@ -290,7 +232,7 @@
             <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-bold text-slate-900">Activity Timeline & CSV Log</h2>
-                    <p class="text-xs text-slate-500">Every entry is automatically structured for your GitHub CSV file</p>
+                    <p class="text-xs text-slate-500">Automatically synced with your GitHub repository CSV when PAT is configured</p>
                 </div>
 
                 <!-- Filter Pills -->
@@ -321,7 +263,7 @@
                 </table>
             </div>
             <div id="empty-state" class="hidden p-10 text-center">
-                <p class="text-slate-400 font-medium text-sm">No entries found for this filter. Click <strong>"+ Log Entry"</strong> above to add one!</p>
+                <p class="text-slate-400 font-medium text-sm">No entries logged yet for this view. Click <strong>"+ Log Entry"</strong> above to add your first entry!</p>
             </div>
         </section>
 
@@ -357,8 +299,8 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Child</label>
                         <select id="entry-child" onchange="updateSubjectOptions()" required class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                            <option value="11y">11y Son</option>
-                            <option value="6y">6y Son</option>
+                            <option value="11y">MK</option>
+                            <option value="6y">NK</option>
                         </select>
                     </div>
                     <div>
@@ -424,27 +366,27 @@
                 <!-- Shared Notes Field -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Notes / Details (Optional)</label>
-                    <input type="text" id="entry-notes" placeholder="e.g., Completed JMC 2023 past paper Q1-15, or 100% on Doodle English" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <input type="text" id="entry-notes" placeholder="e.g., Completed JMC past paper Q1-15, or Doodle English" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
 
                 <!-- Submit Actions -->
                 <div class="pt-2 flex items-center justify-end gap-2">
                     <button type="button" onclick="closeEntryModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition">Save Entry</button>
+                    <button type="submit" id="submit-entry-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition">Save Entry</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- MODAL 2: GITHUB & CSV SYNC MODAL                                      -->
+    <!-- MODAL 2: GITHUB & CSV SYNC MODAL (WITH PAT AUTO-SAVE)                 -->
     <!-- ===================================================================== -->
     <div id="sync-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i class="fa-brands fa-github text-xl text-slate-800"></i>
-                    <h3 class="text-lg font-extrabold text-slate-900">GitHub Repo & CSV Management</h3>
+                    <h3 class="text-lg font-extrabold text-slate-900">GitHub Auto-Sync & CSV Management</h3>
                 </div>
                 <button onclick="closeSyncModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -452,64 +394,87 @@
             </div>
 
             <div class="p-6 overflow-y-auto space-y-6">
-                <!-- Export Section -->
+                <!-- Automatic GitHub API Sync Configuration -->
+                <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-indigo-950 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i>
+                            <span>1. Automatic One-Click Save to GitHub (PAT)</span>
+                        </h4>
+                        <span id="pat-status-pill" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">Not Configured</span>
+                    </div>
+                    <p class="text-xs text-indigo-900/80 leading-relaxed">
+                        Connect your repository once. Your Fine-Grained Personal Access Token is stored <strong>strictly inside this browser's local storage</strong> and is never uploaded to GitHub.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">GitHub Username</label>
+                            <input type="text" id="gh-owner" placeholder="e.g., your-username" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Repository Name</label>
+                            <input type="text" id="gh-repo" placeholder="e.g., mission-control" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Branch Name</label>
+                            <input type="text" id="gh-branch" value="main" placeholder="main" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">CSV File Path in Repo</label>
+                            <input type="text" id="gh-path" value="progress_log.csv" placeholder="progress_log.csv" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Fine-Grained Personal Access Token (Contents: Read & Write)</label>
+                        <input type="password" id="gh-pat" placeholder="github_pat_..." class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <button onclick="saveGithubConfigAndSync()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i> Save & Connect
+                        </button>
+                        <button onclick="pushToGithub(true)" class="bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-upload"></i> Push Now
+                        </button>
+                        <button onclick="pullFromGithub(true)" class="bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-download"></i> Pull Latest
+                        </button>
+                        <button onclick="disconnectGithub()" class="ml-auto text-xs font-semibold text-rose-600 hover:underline">
+                            Clear Token
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manual Export Section -->
                 <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4">
-                    <h4 class="font-bold text-emerald-900 text-sm mb-1">1. Save / Export Your Progress to CSV</h4>
-                    <p class="text-xs text-emerald-800 mb-3">Download the CSV file to commit to your GitHub repo, or copy it directly to paste into GitHub's web editor.</p>
+                    <h4 class="font-bold text-emerald-900 text-sm mb-1">2. Manual CSV Export & Backup</h4>
+                    <p class="text-xs text-emerald-800 mb-3">Download a local backup or copy CSV text anytime.</p>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="downloadCsv('all')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center gap-2">
+                        <button onclick="downloadCsv('all')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-2">
                             <i class="fa-solid fa-download"></i> Download Full CSV (`progress_log.csv`)
                         </button>
-                        <button onclick="downloadCsv('today')" class="bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-day"></i> Download Today's CSV
+                        <button onclick="downloadCsv('today')" class="bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day"></i> Today's CSV
                         </button>
-                        <button onclick="copyCsvToClipboard()" class="bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                        <button onclick="copyCsvToClipboard()" class="bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2">
                             <i class="fa-regular fa-copy"></i> Copy CSV Text
                         </button>
                     </div>
                 </div>
 
-                <!-- Import from GitHub URL or Local File -->
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
-                    <h4 class="font-bold text-slate-900 text-sm">2. Load Data from GitHub Repo or Local CSV</h4>
-
-                    <!-- GitHub Raw URL Fetcher -->
+                <!-- Import from Local File -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                    <h4 class="font-bold text-slate-900 text-sm">3. Import from Local CSV File</h4>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Load directly from GitHub Raw CSV URL (or relative `./data.csv`)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="github-csv-url" placeholder="e.g., https://raw.githubusercontent.com/username/repo/main/progress_log.csv" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button onclick="fetchGithubCsv()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition whitespace-nowrap">
-                                Fetch CSV
-                            </button>
-                        </div>
-                        <p class="text-[11px] text-slate-500 mt-1">Tip: If you host this HTML file and <code>progress_log.csv</code> in the same GitHub Pages folder, the app will automatically attempt to load <code>./progress_log.csv</code> on startup!</p>
-                    </div>
-
-                    <!-- Local CSV Upload -->
-                    <div class="pt-2 border-t border-slate-200">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Or Upload a Local CSV File</label>
                         <input type="file" id="csv-file-input" accept=".csv" onchange="handleFileUpload(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                     </div>
                 </div>
 
-                <!-- GitHub Pages Quick Setup Guide -->
-                <div class="border border-slate-200 rounded-xl p-4 space-y-2">
-                    <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-rocket text-indigo-600"></i>
-                        <span>How to Host on GitHub Pages in 2 Minutes</span>
-                    </h4>
-                    <ol class="list-decimal list-inside text-xs text-slate-600 space-y-1.5 leading-relaxed">
-                        <li>Create a new GitHub repository (e.g., <code>family-charts</code>).</li>
-                        <li>Save this single HTML file as <code>index.html</code> and upload it to the repo.</li>
-                        <li>Go to <strong>Settings &rarr; Pages</strong>, select <strong>Deploy from branch (main)</strong>, and save.</li>
-                        <li>Bookmark your new GitHub Pages URL on your phone or laptop! Log points here, click <strong>Copy CSV</strong>, and paste into <code>progress_log.csv</code> in your repo whenever you want to back up or sync across devices.</li>
-                    </ol>
-                </div>
-
-                <!-- Reset / Sample Data Management -->
+                <!-- Reset All Points & Data -->
                 <div class="flex items-center justify-between pt-2 border-t border-slate-200">
-                    <button onclick="resetToSampleData()" class="text-xs font-semibold text-indigo-600 hover:underline">Restore Sample Demo Data</button>
-                    <button onclick="clearAllData()" class="text-xs font-semibold text-rose-600 hover:underline">Clear All Data</button>
+                    <button onclick="resetAllPointsToZero()" class="text-xs font-semibold text-rose-600 hover:underline">Reset All Points & Entries to Zero</button>
                 </div>
             </div>
         </div>
@@ -522,11 +487,11 @@
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-6 space-y-4">
             <h3 class="text-lg font-extrabold text-slate-900">Customize Profiles</h3>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">11-Year-Old Name</label>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">11-Year-Old Tab Name</label>
                 <input type="text" id="input-name-11y" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">6-Year-Old Name</label>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">6-Year-Old Tab Name</label>
                 <input type="text" id="input-name-6y" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold">
             </div>
             <div class="flex justify-end gap-2 pt-2">
@@ -543,9 +508,9 @@
         // ==========================================
         // 1. CONFIGURATION & CONSTANTS
         // ==========================================
-        const STORAGE_KEY = 'familycharts_entries_v1';
-        const NAMES_KEY = 'familycharts_names_v1';
-        const CSV_URL_KEY = 'familycharts_csv_url_v1';
+        const STORAGE_KEY = 'missioncontrol_entries_v2_zero';
+        const NAMES_KEY = 'missioncontrol_names_v1';
+        const GH_CONFIG_KEY = 'missioncontrol_gh_config_v1';
 
         const SUBJECTS_BY_CHILD = {
             '11y': [
@@ -583,44 +548,42 @@
         // 2. APPLICATION STATE
         // ==========================================
         let entries = [];
-        let currentChild = 'all'; // 'all', '11y', '6y'
+        let currentChild = '11y'; // Default to MK ('11y') or NK ('6y') — no Overview tab
         let feedFilter = 'all';   // 'all', 'behaviour', 'homework'
-        let childNames = { '11y': 'Son (11y)', '6y': 'Son (6y)' };
+        let childNames = { '11y': 'MK', '6y': 'NK' };
+        let ghConfig = { owner: '', repo: '', branch: 'main', path: 'progress_log.csv', pat: '' };
         let behaviourChartInstance = null;
 
         // ==========================================
-        // 3. INITIALIZATION & SAMPLE DATA
+        // 3. INITIALIZATION (STARTS AT ZERO)
         // ==========================================
         window.addEventListener('DOMContentLoaded', async () => {
             loadNames();
-            const savedUrl = localStorage.getItem(CSV_URL_KEY);
-            if (savedUrl) {
-                document.getElementById('github-csv-url').value = savedUrl;
-            }
-
-            // Set today's date in entry form
+            loadGithubConfig();
             document.getElementById('entry-date').value = getTodayISO();
 
-            // Load entries from LocalStorage or populate sample data
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 try {
                     entries = JSON.parse(stored);
                 } catch (e) {
-                    entries = generateSampleData();
+                    entries = [];
                 }
             } else {
-                // Check if hosted on GitHub Pages with a sibling ./progress_log.csv
-                const autoLoaded = await tryAutoLoadSiblingCsv();
-                if (!autoLoaded) {
-                    entries = generateSampleData();
-                    saveEntries();
-                }
+                entries = [];
+                saveEntriesLocally();
             }
 
             updateBehaviourBadges();
             updateSubjectOptions();
             renderDashboard();
+
+            // If GitHub PAT is configured, automatically pull latest CSV from repo
+            if (isGithubConfigured()) {
+                await pullFromGithub(false);
+            } else {
+                await tryAutoLoadSiblingCsv();
+            }
         });
 
         function getTodayISO() {
@@ -634,54 +597,196 @@
             return d.toISOString().split('T')[0];
         }
 
-        function generateSampleData() {
-            return [
-                // 11y Sample Data
-                { id: '1', date: getTodayISO(), child: '11y', type: 'homework', category: 'JMC Prep', polarity: '', points: 0, status: 'Completed', minutes: 35, notes: 'Solved 2024 JMC Q1-18; reviewed geometry angles' },
-                { id: '2', date: getTodayISO(), child: '11y', type: 'behaviour', category: 'Independent Study', polarity: 'positive', points: 3, status: '', minutes: 0, notes: 'Started JMC practice without being asked' },
-                { id: '3', date: getDaysAgoISO(1), child: '11y', type: 'homework', category: 'Python Learning', polarity: '', points: 0, status: 'Completed', minutes: 45, notes: 'Built a text-based number guessing game using while loops' },
-                { id: '4', date: getDaysAgoISO(1), child: '11y', type: 'behaviour', category: 'Screen Time Overrun', polarity: 'negative', points: 1, status: '', minutes: 0, notes: '10 mins past evening cutoff' },
-                { id: '5', date: getDaysAgoISO(2), child: '11y', type: 'homework', category: 'Big Bang Competition Prep', polarity: '', points: 0, status: 'In Progress', minutes: 40, notes: 'Drafted hypothesis & sensor data table for project' },
-                { id: '6', date: getDaysAgoISO(3), child: '11y', type: 'behaviour', category: 'Kindness & Helping Brother', polarity: 'positive', points: 2, status: '', minutes: 0, notes: 'Helped 6y practice 5x tables' },
-
-                // 6y Sample Data
-                { id: '7', date: getTodayISO(), child: '6y', type: 'homework', category: 'Doodle English', polarity: '', points: 0, status: 'Completed', minutes: 15, notes: 'Earned 12 stars & kept streak alive!' },
-                { id: '8', date: getTodayISO(), child: '6y', type: 'behaviour', category: 'Great Focus & Effort', polarity: 'positive', points: 2, status: '', minutes: 0, notes: 'Super neat handwriting on spelling sheet' },
-                { id: '9', date: getDaysAgoISO(1), child: '6y', type: 'homework', category: 'Times Tables', polarity: '', points: 0, status: 'Completed', minutes: 15, notes: 'Nailed 2x and 10x speed challenge' },
-                { id: '10', date: getDaysAgoISO(1), child: '6y', type: 'homework', category: 'Spelling', polarity: '', points: 0, status: 'Completed', minutes: 15, notes: '8/8 words spelled right on first try' },
-                { id: '11', date: getDaysAgoISO(2), child: '6y', type: 'homework', category: 'Maths', polarity: '', points: 0, status: 'Completed', minutes: 20, notes: 'Number bonds to 20 worksheet' },
-                { id: '12', date: getDaysAgoISO(2), child: '6y', type: 'behaviour', category: 'Arguing / Not Listening', polarity: 'negative', points: 1, status: '', minutes: 0, notes: 'Reluctant to tidy Lego before dinner' },
-                { id: '13', date: getDaysAgoISO(3), child: '6y', type: 'behaviour', category: 'Tidy Room & Routine', polarity: 'positive', points: 3, status: '', minutes: 0, notes: 'Put all books and toys away quickly' }
-            ];
-        }
-
-        function saveEntries() {
+        function saveEntriesLocally() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
         }
 
         // ==========================================
-        // 4. NAVIGATION & FILTERING
+        // 4. GITHUB REST API AUTO-SYNC (PAT)
+        // ==========================================
+        function isGithubConfigured() {
+            return Boolean(ghConfig.owner && ghConfig.repo && ghConfig.path && ghConfig.pat);
+        }
+
+        function loadGithubConfig() {
+            const saved = localStorage.getItem(GH_CONFIG_KEY);
+            if (saved) {
+                try {
+                    ghConfig = { ...ghConfig, ...JSON.parse(saved) };
+                } catch (e) {}
+            }
+            document.getElementById('gh-owner').value = ghConfig.owner || '';
+            document.getElementById('gh-repo').value = ghConfig.repo || '';
+            document.getElementById('gh-branch').value = ghConfig.branch || 'main';
+            document.getElementById('gh-path').value = ghConfig.path || 'progress_log.csv';
+            document.getElementById('gh-pat').value = ghConfig.pat || '';
+            updateSyncStatusUI();
+        }
+
+        function updateSyncStatusUI() {
+            const badge = document.getElementById('github-sync-badge');
+            const pill = document.getElementById('pat-status-pill');
+            if (isGithubConfigured()) {
+                badge.classList.remove('hidden');
+                pill.textContent = 'Connected';
+                pill.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+            } else {
+                badge.classList.add('hidden');
+                pill.textContent = 'Not Configured';
+                pill.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700';
+            }
+        }
+
+        async function saveGithubConfigAndSync() {
+            ghConfig = {
+                owner: document.getElementById('gh-owner').value.trim(),
+                repo: document.getElementById('gh-repo').value.trim(),
+                branch: document.getElementById('gh-branch').value.trim() || 'main',
+                path: document.getElementById('gh-path').value.trim() || 'progress_log.csv',
+                pat: document.getElementById('gh-pat').value.trim()
+            };
+
+            if (!isGithubConfigured()) {
+                showToast('Please fill in Username, Repo, File Path, and PAT.', 'error');
+                return;
+            }
+
+            localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(ghConfig));
+            updateSyncStatusUI();
+            await pushToGithub(true);
+            closeSyncModal();
+        }
+
+        function disconnectGithub() {
+            ghConfig = { owner: '', repo: '', branch: 'main', path: 'progress_log.csv', pat: '' };
+            localStorage.removeItem(GH_CONFIG_KEY);
+            loadGithubConfig();
+            showToast('GitHub token cleared from this browser.', 'info');
+        }
+
+        function encodeBase64Unicode(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function decodeBase64Unicode(base64) {
+            const binary = atob(base64.replace(/\s/g, ''));
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
+        }
+
+        async function pullFromGithub(notify = true) {
+            if (!isGithubConfigured()) return false;
+            const apiUrl = `https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${ghConfig.path}?ref=${encodeURIComponent(ghConfig.branch)}`;
+
+            try {
+                const res = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${ghConfig.pat}`,
+                        'Accept': 'application/vnd.github+json'
+                    },
+                    cache: 'no-store'
+                });
+
+                if (res.status === 404) {
+                    if (notify) showToast('CSV not found in repo yet—click "Push Now" to create it!', 'info');
+                    return false;
+                }
+                if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+
+                const data = await res.json();
+                const csvText = decodeBase64Unicode(data.content);
+                const imported = parseCSVToEntries(csvText);
+
+                entries = imported;
+                saveEntriesLocally();
+                renderDashboard();
+                if (notify) showToast(`Synced ${imported.length} entries from GitHub!`, 'success');
+                return true;
+            } catch (err) {
+                if (notify) showToast(`GitHub Pull Error: ${err.message}`, 'error');
+            }
+            return false;
+        }
+
+        async function pushToGithub(notify = true) {
+            if (!isGithubConfigured()) return false;
+            const apiUrl = `https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${ghConfig.path}`;
+
+            try {
+                let existingSha = null;
+                const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(ghConfig.branch)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${ghConfig.pat}`,
+                        'Accept': 'application/vnd.github+json'
+                    },
+                    cache: 'no-store'
+                });
+
+                if (checkRes.ok) {
+                    const existingData = await checkRes.json();
+                    existingSha = existingData.sha;
+                } else if (checkRes.status !== 404) {
+                    throw new Error(`GitHub Check Error ${checkRes.status}`);
+                }
+
+                const csvContent = convertEntriesToCSV(entries);
+                const payload = {
+                    message: `Update progress_log.csv via Mission Control (${getTodayISO()})`,
+                    content: encodeBase64Unicode(csvContent),
+                    branch: ghConfig.branch
+                };
+                if (existingSha) {
+                    payload.sha = existingSha;
+                }
+
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${ghConfig.pat}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!putRes.ok) {
+                    const errBody = await putRes.json().catch(() => ({}));
+                    throw new Error(errBody.message || `GitHub Save Error ${putRes.status}`);
+                }
+
+                if (notify) showToast('Saved & synced to GitHub CSV!', 'success');
+                return true;
+            } catch (err) {
+                showToast(`GitHub Sync Failed: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        // ==========================================
+        // 5. NAVIGATION & FILTERING (MK & NK ONLY)
         // ==========================================
         function switchChild(child) {
-            currentChild = child;
+            currentChild = (child === '6y') ? '6y' : '11y';
 
-            // Update Tab Styles
-            ['all', '11y', '6y'].forEach(key => {
+            ['11y', '6y'].forEach(key => {
                 const btn = document.getElementById(`tab-${key}`);
-                if (key === child) {
+                const dot = btn.querySelector('span:first-child');
+                if (key === currentChild) {
                     btn.className = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap';
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-white/90';
                 } else {
                     btn.className = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 whitespace-nowrap border border-slate-200';
+                    dot.className = key === '11y' ? 'w-2.5 h-2.5 rounded-full bg-blue-500' : 'w-2.5 h-2.5 rounded-full bg-amber-500';
                 }
             });
-
-            // Show/Hide Family Side-by-Side Comparison Section
-            const compSection = document.getElementById('family-comparison-section');
-            if (child === 'all') {
-                compSection.classList.remove('hidden');
-            } else {
-                compSection.classList.add('hidden');
-            }
 
             renderDashboard();
         }
@@ -699,25 +804,23 @@
             renderActivityTable();
         }
 
-        function getFilteredEntries(overrideChild = null) {
-            const targetChild = overrideChild || currentChild;
+        function getFilteredEntries() {
             const daysVal = document.getElementById('timeframe-filter').value;
             const cutoffDate = daysVal === 'all' ? null : getDaysAgoISO(parseInt(daysVal, 10));
 
             return entries.filter(item => {
-                const matchChild = targetChild === 'all' || item.child === targetChild;
+                const matchChild = item.child === currentChild;
                 const matchDate = !cutoffDate || item.date >= cutoffDate;
                 return matchChild && matchDate;
             }).sort((a, b) => b.date.localeCompare(a.date));
         }
 
         // ==========================================
-        // 5. DASHBOARD RENDERING
+        // 6. DASHBOARD RENDERING
         // ==========================================
         function renderDashboard() {
             const filtered = getFilteredEntries();
 
-            // 1. Calculate Behaviour & Homework KPIs
             let posPoints = 0, posCount = 0;
             let negPoints = 0, negCount = 0;
             let hwCompleted = 0, hwTotalMins = 0;
@@ -740,50 +843,23 @@
 
             const netScore = posPoints - negPoints;
             const totalPoints = posPoints + negPoints;
-            const posRatio = totalPoints > 0 ? Math.round((posPoints / totalPoints) * 100) : 100;
+            const posRatio = totalPoints > 0 ? Math.round((posPoints / totalPoints) * 100) : 0;
 
-            document.getElementById('kpi-net-score').textContent = (netScore >= 0 ? '+' : '') + netScore;
-            document.getElementById('kpi-net-score').className = `text-3xl font-extrabold mt-1 ${netScore >= 0 ? 'text-slate-900' : 'text-rose-600'}`;
+            document.getElementById('kpi-net-score').textContent = totalPoints === 0 ? '0' : ((netScore > 0 ? '+' : '') + netScore);
+            document.getElementById('kpi-net-score').className = `text-3xl font-extrabold mt-1 ${netScore < 0 ? 'text-rose-600' : 'text-slate-900'}`;
             document.getElementById('kpi-ratio-text').textContent = `${posRatio}% Positive Ratio`;
-            document.getElementById('kpi-pos-points').textContent = `+${posPoints}`;
-            document.getElementById('kpi-pos-count').textContent = `${posCount} positive award${posCount === 1 ? '' : 's'}`;
+            document.getElementById('kpi-ratio-text').className = `text-xs font-semibold mt-1 ${totalPoints === 0 ? 'text-slate-500' : (posRatio >= 50 ? 'text-emerald-600' : 'text-rose-600')}`;
+            document.getElementById('kpi-pos-points').textContent = posPoints > 0 ? `+${posPoints}` : '0';
+            document.getElementById('kpi-pos-count').textContent = `${posCount} award${posCount === 1 ? '' : 's'} logged`;
             document.getElementById('kpi-neg-points').textContent = negPoints > 0 ? `-${negPoints}` : '0';
-            document.getElementById('kpi-neg-count').textContent = `${negCount} deduction${negCount === 1 ? '' : 's'}`;
+            document.getElementById('kpi-neg-count').textContent = `${negCount} deduction${negCount === 1 ? '' : 's'} logged`;
             document.getElementById('kpi-hw-completed').textContent = hwCompleted;
             document.getElementById('kpi-hw-mins').textContent = `${hwTotalMins} mins total study`;
 
-            // 2. Render Family Comparison Cards if in 'all' view
-            if (currentChild === 'all') {
-                renderComparisonCards();
-            }
-
-            // 3. Render ClassCharts Behaviour Donut Chart & Top Badges
             renderBehaviourChart(posPoints, negPoints, posRatio);
             renderBadgeBreakdown(filtered);
-
-            // 4. Render Homework Subject Cards
             renderHomeworkCards(filtered);
-
-            // 5. Render Activity Log Table
             renderActivityTable();
-        }
-
-        function renderComparisonCards() {
-            ['11y', '6y'].forEach(c => {
-                const list = getFilteredEntries(c);
-                let pos = 0, neg = 0, hw = 0;
-                list.forEach(e => {
-                    if (e.type === 'behaviour') {
-                        if (e.polarity === 'positive') pos += Number(e.points);
-                        else neg += Number(e.points);
-                    } else if (e.type === 'homework' && e.status === 'Completed') {
-                        hw++;
-                    }
-                });
-                document.getElementById(`comp-${c}-pos`).textContent = `+${pos}`;
-                document.getElementById(`comp-${c}-neg`).textContent = neg > 0 ? `-${neg}` : '0';
-                document.getElementById(`comp-${c}-hw`).textContent = `${hw} done`;
-            });
         }
 
         function renderBehaviourChart(posPoints, negPoints, posRatio) {
@@ -844,7 +920,7 @@
             const sortedBadges = Object.values(badgeMap).sort((a, b) => b.points - a.points);
 
             if (sortedBadges.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic">No behaviour points recorded in this period.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">0 points logged yet for ${escapeHtml(childNames[currentChild])}.</p>`;
                 return;
             }
 
@@ -869,16 +945,7 @@
 
         function renderHomeworkCards(filtered) {
             const grid = document.getElementById('homework-subjects-grid');
-            let subjectsToShow = [];
-
-            if (currentChild === 'all') {
-                subjectsToShow = [
-                    ...SUBJECTS_BY_CHILD['11y'].map(s => ({ ...s, child: '11y' })),
-                    ...SUBJECTS_BY_CHILD['6y'].map(s => ({ ...s, child: '6y' }))
-                ];
-            } else {
-                subjectsToShow = SUBJECTS_BY_CHILD[currentChild].map(s => ({ ...s, child: currentChild }));
-            }
+            const subjectsToShow = SUBJECTS_BY_CHILD[currentChild].map(s => ({ ...s, child: currentChild }));
 
             grid.innerHTML = subjectsToShow.map(subj => {
                 const sessions = filtered.filter(e =>
@@ -891,9 +958,10 @@
                 const totalMins = sessions.reduce((acc, s) => acc + (Number(s.minutes) || 0), 0);
                 const latest = sessions[0];
 
+                const childLabel = childNames[subj.child] || subj.child;
                 const childBadge = subj.child === '11y'
-                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">11y</span>`
-                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-700">6y</span>`;
+                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">${escapeHtml(childLabel)}</span>`
+                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-700">${escapeHtml(childLabel)}</span>`;
 
                 return `
                     <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition flex flex-col justify-between">
@@ -922,7 +990,7 @@
                                 ? `<p class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border border-slate-100 truncate" title="${escapeHtml(latest.notes || latest.status)}">
                                     <span class="font-bold text-emerald-600">${latest.date.slice(5)}:</span> ${escapeHtml(latest.notes || latest.status)}
                                    </p>`
-                                : `<p class="text-[11px] text-slate-400 italic py-1">No sessions logged yet</p>`
+                                : `<p class="text-[11px] text-slate-400 italic py-1">0 sessions logged yet</p>`
                             }
                         </div>
                     </div>
@@ -989,13 +1057,11 @@
         }
 
         // ==========================================
-        // 6. DATA ENTRY FORM LOGIC
+        // 7. DATA ENTRY FORM LOGIC
         // ==========================================
         function openEntryModal(defaultType = 'behaviour') {
             document.getElementById('entry-modal').classList.remove('hidden');
-            if (currentChild === '11y' || currentChild === '6y') {
-                document.getElementById('entry-child').value = currentChild;
-            }
+            document.getElementById('entry-child').value = currentChild;
             setEntryType(defaultType);
             updateSubjectOptions();
         }
@@ -1040,8 +1106,9 @@
                 .join('');
         }
 
-        function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('submit-entry-btn');
             const type = document.getElementById('entry-type').value;
             const child = document.getElementById('entry-child').value;
             const date = document.getElementById('entry-date').value;
@@ -1063,22 +1130,36 @@
             };
 
             entries.unshift(newEntry);
-            saveEntries();
+            saveEntriesLocally();
             renderDashboard();
-            closeEntryModal();
             document.getElementById('entry-notes').value = '';
-            showToast('Entry logged & saved!', 'success');
+
+            if (isGithubConfigured()) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Syncing to GitHub...';
+                await pushToGithub(true);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Entry';
+            } else {
+                showToast('Entry saved locally! Configure PAT in CSV & GitHub to auto-sync.', 'success');
+            }
+
+            closeEntryModal();
         }
 
-        function deleteEntry(id) {
+        async function deleteEntry(id) {
             entries = entries.filter(e => e.id !== id);
-            saveEntries();
+            saveEntriesLocally();
             renderDashboard();
-            showToast('Entry removed.', 'info');
+            if (isGithubConfigured()) {
+                await pushToGithub(true);
+            } else {
+                showToast('Entry removed locally.', 'info');
+            }
         }
 
         // ==========================================
-        // 7. CSV IMPORT / EXPORT & GITHUB SYNC
+        // 8. CSV IMPORT / EXPORT HELPERS
         // ==========================================
         function openSyncModal() {
             document.getElementById('sync-modal').classList.remove('hidden');
@@ -1093,7 +1174,6 @@
             const rows = dataList.map(item => {
                 return headers.map(h => {
                     let val = item[h] !== undefined && item[h] !== null ? String(item[h]) : '';
-                    // Escape quotes and wrap in quotes if comma or newline exists
                     if (val.includes(',') || val.includes('"') || val.includes('\n')) {
                         val = `"${val.replace(/"/g, '""')}"`;
                     }
@@ -1112,9 +1192,6 @@
 
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
-                // Split CSV respecting quoted commas
-                const values = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-                // Robust regex parser for empty fields too
                 const rowVals = parseCSVLine(lines[i]);
                 const obj = {};
                 headers.forEach((h, idx) => {
@@ -1167,11 +1244,6 @@
                 ? entries.filter(e => e.date === today)
                 : entries;
 
-            if (targetData.length === 0) {
-                showToast('No entries available to export for that range.', 'error');
-                return;
-            }
-
             const csvContent = convertEntriesToCSV(targetData);
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -1200,90 +1272,57 @@
             document.body.removeChild(textarea);
         }
 
-        async function fetchGithubCsv() {
-            const url = document.getElementById('github-csv-url').value.trim();
-            if (!url) {
-                showToast('Please enter a valid GitHub Raw CSV URL.', 'error');
-                return;
-            }
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const text = await response.text();
-                const imported = parseCSVToEntries(text);
-                if (imported.length === 0) throw new Error('No valid rows found in CSV');
-
-                entries = imported;
-                localStorage.setItem(CSV_URL_KEY, url);
-                saveEntries();
-                renderDashboard();
-                closeSyncModal();
-                showToast(`Loaded ${imported.length} entries from GitHub CSV!`, 'success');
-            } catch (err) {
-                showToast(`Could not fetch CSV: ${err.message}`, 'error');
-            }
-        }
-
         async function tryAutoLoadSiblingCsv() {
             try {
                 const res = await fetch('./progress_log.csv');
                 if (!res.ok) return false;
                 const text = await res.text();
                 const imported = parseCSVToEntries(text);
-                if (imported.length > 0) {
-                    entries = imported;
-                    saveEntries();
-                    return true;
-                }
+                entries = imported;
+                saveEntriesLocally();
+                renderDashboard();
+                return true;
             } catch (e) {
                 return false;
             }
-            return false;
         }
 
-        function handleFileUpload(event) {
+        async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const imported = parseCSVToEntries(e.target.result);
-                if (imported.length > 0) {
-                    entries = imported;
-                    saveEntries();
-                    renderDashboard();
-                    closeSyncModal();
-                    showToast(`Imported ${imported.length} rows from ${file.name}!`, 'success');
+                entries = imported;
+                saveEntriesLocally();
+                renderDashboard();
+                if (isGithubConfigured()) {
+                    await pushToGithub(true);
                 } else {
-                    showToast('Could not parse any valid entries from that CSV.', 'error');
+                    showToast(`Imported ${imported.length} rows from ${file.name}!`, 'success');
                 }
+                closeSyncModal();
             };
             reader.readAsText(file);
         }
 
-        function resetToSampleData() {
-            entries = generateSampleData();
-            saveEntries();
-            renderDashboard();
-            closeSyncModal();
-            showToast('Restored realistic sample data!', 'info');
-        }
-
-        function clearAllData() {
+        async function resetAllPointsToZero() {
             entries = [];
-            saveEntries();
+            saveEntriesLocally();
             renderDashboard();
+            if (isGithubConfigured()) await pushToGithub(true);
             closeSyncModal();
-            showToast('All entries cleared.', 'info');
+            showToast('All points and entries reset to 0.', 'info');
         }
 
         // ==========================================
-        // 8. CUSTOMIZE CHILD NAMES & UTILITIES
+        // 9. CUSTOMIZE CHILD NAMES & UTILITIES
         // ==========================================
         function loadNames() {
             const saved = localStorage.getItem(NAMES_KEY);
             if (saved) {
                 try {
-                    childNames = JSON.parse(saved);
+                    childNames = { ...childNames, ...JSON.parse(saved) };
                 } catch (e) {}
             }
             applyNamesToUI();
@@ -1292,8 +1331,6 @@
         function applyNamesToUI() {
             document.getElementById('label-11y').textContent = childNames['11y'];
             document.getElementById('label-6y').textContent = childNames['6y'];
-            document.getElementById('comp-name-11y').textContent = childNames['11y'];
-            document.getElementById('comp-name-6y').textContent = childNames['6y'];
 
             const select = document.getElementById('entry-child');
             select.options[0].text = childNames['11y'];
@@ -1311,14 +1348,14 @@
         }
 
         function saveCustomNames() {
-            const n11 = document.getElementById('input-name-11y').value.trim() || 'Son (11y)';
-            const n6 = document.getElementById('input-name-6y').value.trim() || 'Son (6y)';
+            const n11 = document.getElementById('input-name-11y').value.trim() || 'MK';
+            const n6 = document.getElementById('input-name-6y').value.trim() || 'NK';
             childNames = { '11y': n11, '6y': n6 };
             localStorage.setItem(NAMES_KEY, JSON.stringify(childNames));
             applyNamesToUI();
             renderDashboard();
             closeNamesModal();
-            showToast('Profile names updated!', 'success');
+            showToast('Tab names updated!', 'success');
         }
 
         function showToast(message, type = 'info') {
