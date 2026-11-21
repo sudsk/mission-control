@@ -511,6 +511,9 @@
         const STORAGE_KEY = 'missioncontrol_entries_v2_zero';
         const NAMES_KEY = 'missioncontrol_names_v1';
         const GH_CONFIG_KEY = 'missioncontrol_gh_config_v1';
+        const PENDING_KEY = 'missioncontrol_pending_v1';   // changes not yet uploaded to GitHub
+        const MIGRATED_KEY = 'missioncontrol_migrated_v1';
+        const OLD_STORAGE_KEY = 'familycharts_entries_v1'; // previous version's data
 
         const SUBJECTS_BY_CHILD = {
             '11y': [
@@ -553,6 +556,7 @@
         let childNames = { '11y': 'MK', '6y': 'NK' };
         let ghConfig = { owner: '', repo: '', branch: 'main', path: 'progress_log.csv', pat: '' };
         let behaviourChartInstance = null;
+        let pending = { adds: [], deletes: [], overwrite: false };
 
         // ==========================================
         // 3. INITIALIZATION (STARTS AT ZERO)
@@ -573,6 +577,8 @@
                 entries = [];
                 saveEntriesLocally();
             }
+            loadPending();
+            migrateOldVersionData();
 
             updateBehaviourBadges();
             updateSubjectOptions();
@@ -653,6 +659,10 @@
 
             localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(ghConfig));
             updateSyncStatusUI();
+            // Merge everything on this device into whatever the repo already holds.
+            const ids = new Set(pending.adds);
+            entries.forEach(e => { if (!ids.has(e.id)) pending.adds.push(e.id); });
+            savePending();
             await pushToGithub(true);
             closeSyncModal();
         }
@@ -682,92 +692,185 @@
             return new TextDecoder().decode(bytes);
         }
 
-        async function pullFromGithub(notify = true) {
-            if (!isGithubConfigured()) return false;
-            const apiUrl = `https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${ghConfig.path}?ref=${encodeURIComponent(ghConfig.branch)}`;
+        // Fetches the CSV currently in the repo. Returns { exists, sha, entries }.
+        async function fetchRemoteCsv() {
+            const apiUrl = `${githubApiUrl()}?ref=${encodeURIComponent(ghConfig.branch)}`;
+            const res = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${ghConfig.pat}`,
+                    'Accept': 'application/vnd.github+json'
+                },
+                cache: 'no-store'
+            });
+            if (res.status === 404) return { exists: false, sha: null, entries: [] };
+            if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+            const data = await res.json();
+            return { exists: true, sha: data.sha, entries: parseCSVToEntries(decodeBase64Unicode(data.content || '')) };
+        }
 
-            try {
-                const res = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${ghConfig.pat}`,
-                        'Accept': 'application/vnd.github+json'
-                    },
-                    cache: 'no-store'
-                });
+        function githubApiUrl() {
+            const path = ghConfig.path.split('/').map(encodeURIComponent).join('/');
+            return `https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${path}`;
+        }
 
-                if (res.status === 404) {
-                    if (notify) showToast('CSV not found in repo yet—click "Push Now" to create it!', 'info');
+        // Runs sync jobs one at a time so two saves never race each other.
+        let syncChain = Promise.resolve();
+        function queueSync(job) {
+            const run = syncChain.then(job);
+            syncChain = run.catch(() => {});
+            return run;
+        }
+
+        function pullFromGithub(notify = true) {
+            if (!isGithubConfigured()) return Promise.resolve(false);
+            return queueSync(async () => {
+                // A reset/import that never reached GitHub wins over what's there.
+                if (pending.overwrite) return doPush(notify, true);
+                try {
+                    const remote = await fetchRemoteCsv();
+                    entries = mergeWithRemote(remote.entries);
+                    saveEntriesLocally();
+                    renderDashboard();
+
+                    const waiting = pending.adds.length + pending.deletes.length;
+                    if (waiting > 0) {
+                        const ok = await doPush(false, false);
+                        if (ok) showToast(`Uploaded ${waiting} change${waiting === 1 ? '' : 's'} saved earlier on this device.`, 'success');
+                        return ok;
+                    }
+                    if (notify) {
+                        showToast(remote.exists
+                            ? `Synced ${entries.length} entries from GitHub!`
+                            : 'CSV not in the repo yet — it will be created on your next save.', remote.exists ? 'success' : 'info');
+                    }
+                    return true;
+                } catch (err) {
+                    showToast(`GitHub Pull Error: ${err.message}. Showing the copy on this device.`, 'error');
                     return false;
                 }
-                if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+            });
+        }
 
-                const data = await res.json();
-                const csvText = decodeBase64Unicode(data.content);
-                const imported = parseCSVToEntries(csvText);
+        function pushToGithub(notify = true, overwrite = false) {
+            if (!isGithubConfigured()) return Promise.resolve(false);
+            return queueSync(() => doPush(notify, overwrite));
+        }
 
-                entries = imported;
-                saveEntriesLocally();
-                renderDashboard();
-                if (notify) showToast(`Synced ${imported.length} entries from GitHub!`, 'success');
-                return true;
-            } catch (err) {
-                if (notify) showToast(`GitHub Pull Error: ${err.message}`, 'error');
+        // Normal save: download the latest CSV, apply this device's pending adds/deletes, upload.
+        // overwrite=true (Import / Reset): replace the CSV with this device's list as-is.
+        async function doPush(notify, overwrite) {
+            const addsSent = new Set(pending.adds);
+            const deletesSent = new Set(pending.deletes);
+
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    const remote = await fetchRemoteCsv();
+                    const finalList = overwrite ? [...entries] : mergeWithRemote(remote.entries);
+
+                    const payload = {
+                        message: `Update ${ghConfig.path} via Mission Control (${getTodayISO()})`,
+                        content: encodeBase64Unicode(convertEntriesToCSV(finalList)),
+                        branch: ghConfig.branch
+                    };
+                    if (remote.sha) payload.sha = remote.sha;
+
+                    const putRes = await fetch(githubApiUrl(), {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${ghConfig.pat}`,
+                            'Accept': 'application/vnd.github+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Someone else saved between our download and upload: go round again.
+                    if ((putRes.status === 409 || putRes.status === 422) && attempt < 3) continue;
+                    if (!putRes.ok) {
+                        const errBody = await putRes.json().catch(() => ({}));
+                        throw new Error(errBody.message || `GitHub Save Error ${putRes.status}`);
+                    }
+
+                    // Clear only what this upload carried; anything logged meanwhile stays pending.
+                    pending.adds = pending.adds.filter(id => !addsSent.has(id));
+                    pending.deletes = pending.deletes.filter(id => !deletesSent.has(id));
+                    if (overwrite) pending.overwrite = false;
+                    savePending();
+
+                    entries = mergeWithRemote(finalList);
+                    saveEntriesLocally();
+                    renderDashboard();
+                    if (notify) showToast('Saved & synced to GitHub CSV!', 'success');
+                    return true;
+                } catch (err) {
+                    showToast(`GitHub sync failed (${err.message}). Saved on this device — it will upload next time.`, 'error');
+                    return false;
+                }
             }
             return false;
         }
 
-        async function pushToGithub(notify = true) {
-            if (!isGithubConfigured()) return false;
-            const apiUrl = `https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${ghConfig.path}`;
+        // Remote list, minus anything deleted here, plus anything added here not yet uploaded.
+        function mergeWithRemote(remoteEntries) {
+            const deleted = new Set(pending.deletes);
+            const merged = remoteEntries.filter(e => !deleted.has(e.id));
+            const have = new Set(merged.map(e => e.id));
+            pending.adds.forEach(id => {
+                const local = entries.find(e => e.id === id);
+                if (local && !have.has(id)) {
+                    merged.push(local);
+                    have.add(id);
+                }
+            });
+            return merged.sort((a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)));
+        }
 
+        function loadPending() {
             try {
-                let existingSha = null;
-                const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(ghConfig.branch)}`, {
-                    headers: {
-                        'Authorization': `Bearer ${ghConfig.pat}`,
-                        'Accept': 'application/vnd.github+json'
-                    },
-                    cache: 'no-store'
-                });
+                const saved = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
+                if (saved) pending = { adds: saved.adds || [], deletes: saved.deletes || [], overwrite: Boolean(saved.overwrite) };
+            } catch (e) {}
+        }
 
-                if (checkRes.ok) {
-                    const existingData = await checkRes.json();
-                    existingSha = existingData.sha;
-                } else if (checkRes.status !== 404) {
-                    throw new Error(`GitHub Check Error ${checkRes.status}`);
-                }
+        function savePending() {
+            localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+        }
 
-                const csvContent = convertEntriesToCSV(entries);
-                const payload = {
-                    message: `Update progress_log.csv via Mission Control (${getTodayISO()})`,
-                    content: encodeBase64Unicode(csvContent),
-                    branch: ghConfig.branch
+        // One-off: bring over real entries logged in the previous version of this page.
+        function migrateOldVersionData() {
+            if (localStorage.getItem(MIGRATED_KEY)) return;
+            localStorage.setItem(MIGRATED_KEY, '1');
+            let old;
+            try { old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY) || 'null'); } catch (e) { return; }
+            if (!Array.isArray(old)) return;
+
+            const sampleIds = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']);
+            const existing = new Set(entries.map(e => e.id));
+            const real = old.filter(e => e && e.id != null
+                && !sampleIds.has(String(e.id))
+                && !existing.has(String(e.id))
+                && (e.child === '11y' || e.child === '6y'));
+            if (real.length === 0) return;
+
+            real.forEach(e => {
+                const entry = {
+                    id: String(e.id),
+                    date: e.date || getTodayISO(),
+                    child: e.child,
+                    type: e.type === 'homework' ? 'homework' : 'behaviour',
+                    category: e.category || 'General',
+                    polarity: e.polarity || '',
+                    points: parseInt(e.points, 10) || 0,
+                    status: e.status || '',
+                    minutes: parseInt(e.minutes, 10) || 0,
+                    notes: e.notes || ''
                 };
-                if (existingSha) {
-                    payload.sha = existingSha;
-                }
-
-                const putRes = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${ghConfig.pat}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!putRes.ok) {
-                    const errBody = await putRes.json().catch(() => ({}));
-                    throw new Error(errBody.message || `GitHub Save Error ${putRes.status}`);
-                }
-
-                if (notify) showToast('Saved & synced to GitHub CSV!', 'success');
-                return true;
-            } catch (err) {
-                showToast(`GitHub Sync Failed: ${err.message}`, 'error');
-                return false;
-            }
+                entries.push(entry);
+                pending.adds.push(entry.id);
+            });
+            saveEntriesLocally();
+            savePending();
+            showToast(`Brought over ${real.length} entr${real.length === 1 ? 'y' : 'ies'} from the previous version.`, 'success');
         }
 
         // ==========================================
@@ -1115,7 +1218,7 @@
             const notes = document.getElementById('entry-notes').value.trim();
 
             const newEntry = {
-                id: Date.now().toString(),
+                id: `${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
                 date,
                 child,
                 type,
@@ -1130,6 +1233,8 @@
             };
 
             entries.unshift(newEntry);
+            pending.adds.push(newEntry.id);
+            savePending();
             saveEntriesLocally();
             renderDashboard();
             document.getElementById('entry-notes').value = '';
@@ -1149,6 +1254,9 @@
 
         async function deleteEntry(id) {
             entries = entries.filter(e => e.id !== id);
+            pending.adds = pending.adds.filter(x => x !== id);
+            if (!pending.deletes.includes(id)) pending.deletes.push(id);
+            savePending();
             saveEntriesLocally();
             renderDashboard();
             if (isGithubConfigured()) {
@@ -1277,8 +1385,7 @@
                 const res = await fetch('./progress_log.csv');
                 if (!res.ok) return false;
                 const text = await res.text();
-                const imported = parseCSVToEntries(text);
-                entries = imported;
+                entries = mergeWithRemote(parseCSVToEntries(text));
                 saveEntriesLocally();
                 renderDashboard();
                 return true;
@@ -1294,10 +1401,12 @@
             reader.onload = async function(e) {
                 const imported = parseCSVToEntries(e.target.result);
                 entries = imported;
+                pending = { adds: [], deletes: [], overwrite: true };
+                savePending();
                 saveEntriesLocally();
                 renderDashboard();
                 if (isGithubConfigured()) {
-                    await pushToGithub(true);
+                    await pushToGithub(true, true);
                 } else {
                     showToast(`Imported ${imported.length} rows from ${file.name}!`, 'success');
                 }
@@ -1308,9 +1417,11 @@
 
         async function resetAllPointsToZero() {
             entries = [];
+            pending = { adds: [], deletes: [], overwrite: true };
+            savePending();
             saveEntriesLocally();
             renderDashboard();
-            if (isGithubConfigured()) await pushToGithub(true);
+            if (isGithubConfigured()) await pushToGithub(true, true);
             closeSyncModal();
             showToast('All points and entries reset to 0.', 'info');
         }
